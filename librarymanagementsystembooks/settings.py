@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,7 +26,7 @@ SECRET_KEY = 'django-insecure-!(uv=6g)dr4l^xq-!s=v%h+u9l%vl(3hv9#m!5q(orzb8d-bf$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -77,11 +78,11 @@ WSGI_APPLICATION = 'librarymanagementsystembooks.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'librarymanagementsystemdb',   # Your database name
-        'USER': 'root',                        # Your MySQL username
-        'PASSWORD': 'Sdp#@2026',           # ⚠️ CHANGE THIS to your MySQL password
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
+        'NAME': os.environ.get('DB_NAME', 'librarymanagementsystemdb'),   # Your database name
+        'USER': os.environ.get('DB_USER', 'root'),                        # Your MySQL username
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'Sdp#@2026'),           # ⚠️ CHANGE THIS to your MySQL password
+        'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
+        'PORT': os.environ.get('DB_PORT', '3306'),
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
@@ -124,6 +125,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') # <-- ADD THIS
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # Email
