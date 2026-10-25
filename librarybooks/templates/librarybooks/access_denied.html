@@ -1,0 +1,14 @@
+{% extends "librarybooks/base.html" %}
+{% block title %}Access Denied{% endblock %}
+{% block content %}
+<div class="max-w-lg mx-auto text-center bg-white rounded-lg shadow p-10 mt-10">
+    <div class="text-6xl text-red-500 mb-4">
+        <i class="fas fa-ban"></i>
+    </div>
+    <h2 class="text-2xl font-bold text-gray-800 mb-2">Access Denied</h2>
+    <p class="text-gray-600 mb-6">Your role ({{ user.role }}) does not have permission to access this page.</p>
+    <a href="{% url 'dashboard' %}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded transition-colors">
+        <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+<nav class="bg-blue-800 text-white px-6 py-4 flex flex-wrap items-center justify-between">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <div class="flex items-center space-x-3">
+        <!-- Optional logo -->
+        <!--<div class="flex items-center justify-center h-10 w-10 mb-3 bg-teal-100 rounded-full text-teal-600 text-2xl">
+            <i class="fas fa-book"></i>
+        </div>-->
+        <a href="{% url 'dashboard' %}" class="flex items-center gap-3 group">
+            <!-- Icon Circle -->
+            <div class="flex items-center justify-center w-10 h-10 bg-white/10 group-hover:bg-white/20 border border-white/20 rounded-full transition-all duration-200">
+                <i class="fas fa-book-open text-white text-lg"></i>
+            </div>
+            <!-- Brand Text -->
+            <div class="flex flex-col leading-tight">
+                <h1><span class="text-white-800 font-bold text-3xl tracking-wide">Library Management System</span></h1>
+            </div>
+        </a>
+        <!--<h1 class="text-xl font-semibold">Library Management System</h1>-->
+    </div>
+    <div>
+        <a href="{% url 'dashboard' %}" class="hover:bg-blue-700 px-3 py-2 rounded mr-2">Dashboard</a>
+        <a href="{% url 'book_search' %}" class="hover:bg-blue-700 px-3 py-2 rounded mr-2">Search</a>
+        <a href="{% url 'checkout' %}" class="hover:bg-blue-700 px-3 py-2 rounded mr-2">Check Out</a>
+        <a href="{% url 'return_book' %}" class="hover:bg-blue-700 px-3 py-2 rounded mr-2">Return</a>
+        <a href="{% url 'reports' %}" class="hover:bg-blue-700 px-3 py-2 rounded mr-2">Reports</a>
+        <a href="{% url 'add_book' %}" class="hover:bg-blue-700 px-3 py-2 rounded mr-2">Add Book</a>
+        <a href="{% url 'add_member' %}" class="hover:bg-blue-700 px-3 py-2 rounded mr-2">Add Member</a>
+        <a href="{% url 'process_payment' %}" class="hover:bg-blue-700 px-3 py-2 rounded mr-2">Payments</a>
+        <a href="{% url 'logout' %}" class="hover:bg-blue-700 px-3 py-2 rounded ml-2">Logout</a>
+        <a href="{% url 'explorer' 'books' %}" class="hover:bg-blue-700 px-3 py-2 rounded ml-2">Data Explorer</a>
+    </div>
+</nav>

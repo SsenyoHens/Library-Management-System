@@ -1,0 +1,253 @@
+{% extends "librarybooks/base.html" %}
+{% block title %}Reports - Library Management System{% endblock %}
+{% block extra_head %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+{% block content %}
+<section class="mb-8">
+    <h1 class="text-3xl font-bold text-blue-800">
+        <i class="fas fa-chart-pie text-blue-600 mr-2"></i> System Reports
+    </h1>
+    <p class="text-gray-600">Live aggregations and statistics from the MySQL database</p>
+</section>
+
+<div class="grid gap-6">
+    {# Period Report Button #}
+    <div class="mb-4">
+        <a href="{% url 'period_report' %}" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded transition-colors">
+            <i class="fas fa-calendar-days mr-2"></i> Generate Period Report (Print/PDF)
+        </a>
+    </div>
+    <div class="mb-4 flex gap-3">
+        <a href="{% url 'period_report' %}" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded transition-colors">
+            <i class="fas fa-calendar-days mr-2"></i> Period Report (Print/PDF)
+        </a>
+        <a href="{% url 'inventory_report' %}" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition-colors">
+            <i class="fas fa-warehouse mr-2"></i> Inventory & Cataloging Report
+        </a>
+    </div>
+    {# Report 1 – Most Borrowed Books #}
+    <div class="col-span-1 lg:col-span-1 bg-white rounded-lg shadow p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-blue-800">
+                <i class="fas fa-trophy text-yellow-500 mr-2"></i> Top 10 Most Borrowed Books
+            </h2>
+        </div>
+        <p class="text-sm text-gray-500 mb-4 font-mono">SELECT … COUNT(l.loan_id) … GROUP BY … ORDER BY … LIMIT 10</p>
+        {% if reports.most_borrowed %}
+        <div class="h-64 mb-4"><canvas id="booksChart"></canvas></div>
+        <table class="min-w-full table-auto border-collapse bg-white">
+            <thead class="bg-blue-800 text-white">
+                <tr><th class="px-4 py-2 text-left">Rank</th><th class="px-4 py-2 text-left">Title</th><th class="px-4 py-2 text-left">Author</th><th class="px-4 py-2 text-left">Times Borrowed</th></tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for book in reports.most_borrowed %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-2">{{ forloop.counter }}</td>
+                    <td class="px-4 py-2"><strong>{{ book.title }}</strong></td>
+                    <td class="px-4 py-2">{{ book.author_name|default:"—" }}</td>
+                    <td class="px-4 py-2">{{ book.times_borrowed }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-center text-gray-500 py-4">No loans recorded yet.</p>
+        {% endif %}
+    </div>
+
+    {# Report 2 – Members with Overdue Books #}
+    <div class="col-span-1 lg:col-span-1 bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-bold text-blue-800 mb-4">
+            <i class="fas fa-triangle-exclamation text-red-500 mr-2"></i> Members with Overdue Books
+        </h2>
+        <p class="text-sm text-gray-500 mb-4 font-mono">SELECT … COUNT … WHERE return_date IS NULL AND due_date < CURDATE() … GROUP BY</p>
+        {% if reports.overdue_members %}
+        <table class="min-w-full table-auto border-collapse bg-white">
+            <thead class="bg-blue-800 text-white">
+                <tr><th class="px-4 py-2 text-left">Member ID</th><th class="px-4 py-2 text-left">Name</th><th class="px-4 py-2 text-left">Email</th><th class="px-4 py-2 text-left">Overdue Books</th></tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for member in reports.overdue_members %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-2">#{{ member.member_id }}</td>
+                    <td class="px-4 py-2">{{ member.first_name }} {{ member.last_name }}</td>
+                    <td class="px-4 py-2">{{ member.email }}</td>
+                    <td class="px-4 py-2 text-red-600 font-medium">{{ member.overdue_count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-center text-gray-500 py-4">No overdue members. Great job!</p>
+        {% endif %}
+    </div>
+
+    {# Report 3 – Fines by Payment Method #}
+    <div class="col-span-1 lg:col-span-1 bg-white rounded-lg shadow p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-blue-800">
+                <i class="fas fa-money-bill-wave text-green-600 mr-2"></i> Fines Collected by Payment Method
+            </h2>
+            <a href="{% url 'export_fines_csv' %}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded text-sm transition-colors">
+                <i class="fas fa-download mr-1"></i> CSV
+            </a>
+        </div>
+        <p class="text-sm text-gray-500 mb-4 font-mono">SELECT payment_method, COUNT(*), SUM(amount_paid) … GROUP BY payment_method</p>
+        {% if reports.fines_by_method %}
+        <div class="h-64 mb-4"><canvas id="finesChart"></canvas></div>
+        <table class="min-w-full table-auto border-collapse bg-white">
+            <thead class="bg-blue-800 text-white">
+                <tr><th class="px-4 py-2 text-left">Payment Method</th><th class="px-4 py-2 text-left">Number of Payments</th><th class="px-4 py-2 text-left">Total Amount (UGX)</th></tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for payment in reports.fines_by_method %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-2">{{ payment.payment_method }}</td>
+                    <td class="px-4 py-2">{{ payment.num_payments }}</td>
+                    <td class="px-4 py-2 text-green-600 font-medium">{{ payment.total_amount|floatformat:0 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-center text-gray-500 py-4">No payments recorded yet.</p>
+        {% endif %}
+    </div>
+
+    {# Report 4 – Category Popularity #}
+    <div class="col-span-1 lg:col-span-1 bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-bold text-blue-800 mb-4">
+            <i class="fas fa-book text-blue-600 mr-2"></i> Book Category Popularity
+        </h2>
+        <p class="text-sm text-gray-500 mb-4 font-mono">SELECT … COUNT(l.loan_id) … LEFT JOIN … GROUP BY … HAVING total_loans > 0</p>
+        {% if reports.category_popularity %}
+        <table class="min-w-full table-auto border-collapse bg-white">
+            <thead class="bg-blue-800 text-white">
+                <tr><th class="px-4 py-2 text-left">Category</th><th class="px-4 py-2 text-left">Total Loans</th><th class="px-4 py-2 text-left">Distinct Books Borrowed</th></tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for cat in reports.category_popularity %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-2">{{ cat.category_name }}</td>
+                    <td class="px-4 py-2">{{ cat.total_loans }}</td>
+                    <td class="px-4 py-2">{{ cat.distinct_books_borrowed }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-center text-gray-500 py-4">No category loans yet.</p>
+        {% endif %}
+    </div>
+
+    {# Report 5 – Daily Activity #}
+    <div class="col-span-1 lg:col-span-1 bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-bold text-blue-800 mb-4">
+            <i class="fas fa-calendar-days text-indigo-600 mr-2"></i> Daily Circulation (Last 7 Days)
+        </h2>
+        <p class="text-sm text-gray-500 mb-4 font-mono">SELECT DATE(issue_date), COUNT(*) … GROUP BY DATE(issue_date) … ORDER BY day DESC</p>
+        {% if reports.daily_activity %}
+        <div class="h-64 mb-4"><canvas id="dailyChart"></canvas></div>
+        <table class="min-w-full table-auto border-collapse bg-white">
+            <thead class="bg-blue-800 text-white">
+                <tr><th class="px-4 py-2 text-left">Date</th><th class="px-4 py-2 text-left">Books Issued</th></tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for day in reports.daily_activity %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-2">{{ day.day }}</td>
+                    <td class="px-4 py-2">{{ day.books_issued }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-center text-gray-500 py-4">No loans in the last 7 days.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% block extra_scripts %}
+<script>
+    // Extract JSON data from Django
+    const chartBooksData = {{ chart_books|safe }};
+    const chartFinesData = {{ chart_fines|safe }};
+    const chartDailyData = {{ chart_daily|safe }};
+
+    // Bar Chart: Most Borrowed Books
+    new Chart(document.getElementById('booksChart'), {
+        type: 'bar',
+        data: {
+            labels: chartBooksData.labels,
+            datasets: [{
+                label: 'Times Borrowed',
+                data: chartBooksData.data,
+                backgroundColor: '#27ae60', // Green
+                borderRadius: 5,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+    });
+
+    // Pie Chart: Fines by Payment Method
+    new Chart(document.getElementById('finesChart'), {
+        type: 'doughnut',
+        data: {
+            labels: chartFinesData.labels,
+            datasets: [{
+                data: chartFinesData.data,
+                backgroundColor: [
+                    '#27ae60', // Green
+                    '#f39c12', // Orange
+                    '#3498db', // Blue
+                    '#9b59b6'  // Purple
+                ],
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.parsed.toLocaleString() + ' UGX';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Line Chart: Daily Activity
+    new Chart(document.getElementById('dailyChart'), {
+        type: 'line',
+        data: {
+            labels: chartDailyData.labels,
+            datasets: [{
+                label: 'Books Issued',
+                data: chartDailyData.data,
+                borderColor: '#3498db', // Blue
+                backgroundColor: 'rgba(52,152,219,0.1)',
+                fill: true,
+                tension: 0.3,
+                pointRadius: 5,
+                pointBackgroundColor: '#3498db',
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

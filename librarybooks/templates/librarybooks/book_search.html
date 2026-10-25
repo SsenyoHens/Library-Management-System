@@ -1,0 +1,118 @@
+{% extends "librarybooks/base.html" %}
+{% block title %}Search Books - Library Management System{% endblock %}
+{% block content %}
+
+<div class="max-w-5xl mx-auto">
+
+    <!-- Header Section -->
+    <div class="flex items-center mb-8">
+        <div class="flex items-center justify-center h-14 w-14 bg-blue-100 rounded-full text-blue-600 text-2xl mr-4 shadow-sm">
+            <i class="fas fa-search"></i>
+        </div>
+        <div>
+            <h1 class="text-3xl font-bold text-blue-800">Search the Catalog</h1>
+            <p class="text-gray-500 mt-1">Find books by title, author, ISBN, or category.</p>
+        </div>
+    </div>
+
+    <!-- Search Bar Section -->
+    <div class="bg-white rounded-xl shadow-lg p-8 mb-8 border-t-4 border-blue-500">
+        <form method="GET" class="flex flex-col sm:flex-row gap-4">
+            <div class="relative flex-grow">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-400 text-lg"></i>
+                </div>
+                <input 
+                    type="text" 
+                    name="q" 
+                    value="{{ query }}" 
+                    placeholder="Search by title, author, ISBN, or category..." 
+                    class="w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                    autofocus
+                >
+            </div>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg text-lg transition-colors shadow-md flex items-center justify-center">
+                <i class="fas fa-arrow-right mr-2"></i> Search
+            </button>
+        </form>
+        <p class="text-sm text-gray-500 mt-4 flex items-center">
+            <i class="fas fa-lightbulb text-yellow-500 mr-2"></i> 
+            <span><strong>Tip:</strong> Try "Things Fall Apart", "Achebe", "African Literature", or an ISBN like "978".</span>
+        </p>
+    </div>
+
+    <!-- Results Section -->
+    {% if search_performed %}
+        {% if results %}
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">
+                    <i class="fas fa-list-check text-blue-600 mr-2"></i> 
+                    Results for "{{ query }}"
+                </h2>
+                <span class="bg-blue-100 text-blue-800 font-bold px-3 py-1 rounded-full text-sm">
+                    {{ results|length }} found
+                </span>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full table-auto border-collapse">
+                        <thead class="bg-blue-800 text-white">
+                            <tr>
+                                <th class="px-6 py-4 text-left font-semibold">Title</th>
+                                <th class="px-6 py-4 text-left font-semibold">Author(s)</th>
+                                <th class="px-6 py-4 text-left font-semibold">Category</th>
+                                <th class="px-6 py-4 text-left font-semibold">Year</th>
+                                <th class="px-6 py-4 text-left font-semibold">Availability</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for book in results %}
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-gray-800">{{ book.title }}</div>
+                                    <div class="text-xs text-gray-500 font-mono mt-1">ISBN: {{ book.isbn }}</div>
+                                </td>
+                                <td class="px-6 py-4 text-gray-700">{{ book.authors|default:"Unknown" }}</td>
+                                <td class="px-6 py-4">
+                                    <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-medium">
+                                        {{ book.category_name }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-gray-700">{{ book.publication_year }}</td>
+                                <td class="px-6 py-4">
+                                    {% if book.available_copies > 0 %}
+                                        <span class="inline-flex items-center bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold">
+                                            <i class="fas fa-check-circle mr-1"></i> 
+                                            {{ book.available_copies }} of {{ book.total_copies }} Available
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-bold">
+                                            <i class="fas fa-times-circle mr-1"></i> 
+                                            All {{ book.total_copies }} On Loan
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        {% else %}
+            <!-- Empty State -->
+            <div class="bg-white rounded-xl shadow-md p-12 text-center">
+                <div class="flex items-center justify-center h-20 w-20 bg-gray-100 rounded-full mx-auto mb-4">
+                    <i class="fas fa-book-open text-gray-400 text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">No books found</h3>
+                <p class="text-gray-500">We couldn't find any matches for "<strong>{{ query }}</strong>".</p>
+                <p class="text-sm text-gray-400 mt-2">Try a different keyword or check your spelling.</p>
+            </div>
+        {% endif %}
+    {% endif %}
+
+</div>
+
+{% endblock %}

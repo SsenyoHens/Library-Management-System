@@ -1,0 +1,176 @@
+{% extends "librarybooks/base.html" %}
+{% block title %}Add Staff - Library Management System{% endblock %}
+{% block content %}
+
+<div class="max-w-3xl mx-auto">
+
+    <!-- Header Section -->
+    <div class="flex items-center mb-8">
+        <div class="flex items-center justify-center h-14 w-14 bg-rose-100 rounded-full text-rose-600 text-2xl mr-4 shadow-sm">
+            <i class="fas fa-user-tie"></i>
+        </div>
+        <div>
+            <h1 class="text-3xl font-bold text-rose-800">Register New Staff Member</h1>
+            <p class="text-gray-500 mt-1">Create a staff login account for library management.</p>
+        </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-xl shadow-lg p-8 border-t-4 border-rose-500">
+        
+        {% if success %}
+            <div class="bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded mb-6 flex items-start">
+                <i class="fas fa-check-circle mt-1 mr-3 text-green-500 text-lg"></i>
+                <div>
+                    <strong class="block font-bold">Success!</strong>
+                    <span>{{ success }}</span>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if error %}
+            <div class="bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded mb-6 flex items-start">
+                <i class="fas fa-times-circle mt-1 mr-3 text-red-500 text-lg"></i>
+                <div>
+                    <strong class="block font-bold">Error</strong>
+                    <span>{{ error }}</span>
+                </div>
+            </div>
+        {% endif %}
+
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- First + Last Name -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">
+                        First Name <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-user text-gray-400"></i>
+                        </div>
+                        <input type="text" name="first_name" placeholder="e.g., John" required
+                               class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-all text-lg">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">
+                        Last Name <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-user text-gray-400"></i>
+                        </div>
+                        <input type="text" name="last_name" placeholder="e.g., Okello" required
+                               class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-all text-lg">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                    Email <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-envelope text-gray-400"></i>
+                    </div>
+                    <input type="email" name="email" placeholder="staff@library.mu.ac.ug" required
+                           class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-all text-lg">
+                </div>
+                <p class="text-xs text-gray-500 mt-2">This email will also be the login username.</p>
+            </div>
+
+            <!-- Phone -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                    Phone Number
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-phone text-gray-400"></i>
+                    </div>
+                    <input type="text" name="phone_number" placeholder="+256 7XX XXX XXX"
+                           class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-all text-lg">
+                </div>
+            </div>
+
+            <!-- Role + Hire Date -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">
+                        Role <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-user-shield text-gray-400"></i>
+                        </div>
+                        <select name="role" required
+                                class="w-full pl-10 pr-10 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-all text-lg appearance-none bg-white">
+                            <option value="">-- Select Role --</option>
+                            <option value="Assistant">Assistant</option>
+                            <option value="Librarian">Librarian</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <i class="fas fa-chevron-down text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">
+                        Hire Date <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-calendar text-gray-400"></i>
+                        </div>
+                        <input type="date" name="hire_date" required
+                               class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-all text-lg">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                    Password <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-lock text-gray-400"></i>
+                    </div>
+                    <input type="password" name="password" placeholder="Minimum 6 characters" required minlength="6"
+                           class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-all text-lg">
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Share this password with the staff member. They can change it later.</p>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-4">
+                <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-4 rounded-lg text-lg transition-colors shadow-md flex items-center justify-center">
+                    <i class="fas fa-user-plus mr-2"></i> Create Staff Account
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Info Card -->
+    <div class="mt-6 bg-blue-50 rounded-lg p-5 border-l-4 border-blue-400 flex items-start">
+        <i class="fas fa-shield-alt text-blue-500 mt-1 mr-3"></i>
+        <div class="text-sm text-blue-800">
+            <strong class="block mb-1">Security Notes:</strong>
+            <ul class="list-disc list-inside space-y-1">
+                <li>Passwords are hashed using <strong>PBKDF2</strong> (Django's default) before being stored.</li>
+                <li>The new staff member can log in immediately with their email and password.</li>
+                <li>Their role determines which pages they can access (RBAC).</li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

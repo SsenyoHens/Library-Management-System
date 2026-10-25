@@ -1,0 +1,160 @@
+{% extends "librarybooks/base.html" %}
+{% block title %}Add Member - Library Management System{% endblock %}
+{% block content %}
+
+<div class="max-w-3xl mx-auto">
+
+    <!-- Header Section -->
+    <div class="flex items-center mb-8">
+        <div class="flex items-center justify-center h-14 w-14 bg-pink-100 rounded-full text-pink-600 text-2xl mr-4 shadow-sm">
+            <i class="fas fa-user-plus"></i>
+        </div>
+        <div>
+            <h1 class="text-3xl font-bold text-pink-800">Register New Member</h1>
+            <p class="text-gray-500 mt-1">Add a new student, staff, or faculty member to the library.</p>
+        </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-xl shadow-lg p-8 border-t-4 border-pink-500">
+        
+        {% if success %}
+            <div class="bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded mb-6 flex items-start">
+                <i class="fas fa-check-circle mt-1 mr-3 text-green-500 text-lg"></i>
+                <div>
+                    <strong class="block font-bold">Success!</strong>
+                    <span>{{ success }}</span>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if error %}
+            <div class="bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded mb-6 flex items-start">
+                <i class="fas fa-times-circle mt-1 mr-3 text-red-500 text-lg"></i>
+                <div>
+                    <strong class="block font-bold">Error</strong>
+                    <span>{{ error }}</span>
+                </div>
+            </div>
+        {% endif %}
+
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- First + Last Name -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">
+                        First Name <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-user text-gray-400"></i>
+                        </div>
+                        <input type="text" name="first_name" placeholder="e.g., Sarah" required
+                               class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all text-lg">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">
+                        Last Name <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-user text-gray-400"></i>
+                        </div>
+                        <input type="text" name="last_name" placeholder="e.g., Nakamya" required
+                               class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all text-lg">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                    Email <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-envelope text-gray-400"></i>
+                    </div>
+                    <input type="email" name="email" placeholder="student@mak.ac.ug" required
+                           class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all text-lg">
+                </div>
+            </div>
+
+            <!-- Phone -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                    Phone Number <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-phone text-gray-400"></i>
+                    </div>
+                    <input type="text" name="phone_number" placeholder="+256 7XX XXX XXX" required
+                           class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all text-lg">
+                </div>
+            </div>
+
+            <!-- Member Type + Date Joined -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">
+                        Member Type <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-id-badge text-gray-400"></i>
+                        </div>
+                        <select name="member_type" required
+                                class="w-full pl-10 pr-10 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all text-lg appearance-none bg-white">
+                            <option value="">-- Select --</option>
+                            <option value="Student">Student</option>
+                            <option value="Staff">Staff</option>
+                            <option value="Faculty">Faculty</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <i class="fas fa-chevron-down text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">
+                        Date Joined <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-calendar text-gray-400"></i>
+                        </div>
+                        <input type="date" name="date_joined" required
+                               class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all text-lg">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-4">
+                <button type="submit" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-4 rounded-lg text-lg transition-colors shadow-md flex items-center justify-center">
+                    <i class="fas fa-user-check mr-2"></i> Register Member
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Info Card -->
+    <div class="mt-6 bg-blue-50 rounded-lg p-5 border-l-4 border-blue-400 flex items-start">
+        <i class="fas fa-info-circle text-blue-500 mt-1 mr-3"></i>
+        <div class="text-sm text-blue-800">
+            <strong class="block mb-1">Registration Notes:</strong>
+            <ul class="list-disc list-inside space-y-1">
+                <li>The email must be unique across all registered members.</li>
+                <li>New members start with an <strong>Active</strong> status automatically.</li>
+                <li>Member types are restricted by the database to: Student, Staff, or Faculty.</li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

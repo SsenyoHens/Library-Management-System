@@ -1,0 +1,155 @@
+{% extends "librarybooks/base.html" %}
+{% block title %}Add Book - Library Management System{% endblock %}
+{% block content %}
+
+<div class="max-w-3xl mx-auto">
+
+    <!-- Header Section -->
+    <div class="flex items-center mb-8">
+        <div class="flex items-center justify-center h-14 w-14 bg-teal-100 rounded-full text-teal-600 text-2xl mr-4 shadow-sm">
+            <i class="fas fa-book-open"></i>
+        </div>
+        <div>
+            <h1 class="text-3xl font-bold text-teal-800">Add New Book</h1>
+            <p class="text-gray-500 mt-1">Expand the library catalog with a new title.</p>
+        </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-xl shadow-lg p-8 border-t-4 border-teal-500">
+        
+        {% if success %}
+            <div class="bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded mb-6 flex items-start">
+                <i class="fas fa-check-circle mt-1 mr-3 text-green-500 text-lg"></i>
+                <div>
+                    <strong class="block font-bold">Success!</strong>
+                    <span>{{ success }}</span>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if error %}
+            <div class="bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded mb-6 flex items-start">
+                <i class="fas fa-times-circle mt-1 mr-3 text-red-500 text-lg"></i>
+                <div>
+                    <strong class="block font-bold">Error</strong>
+                    <span>{{ error }}</span>
+                </div>
+            </div>
+        {% endif %}
+
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- ISBN -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                    ISBN <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-barcode text-gray-400"></i>
+                    </div>
+                    <input type="text" name="isbn" placeholder="9780123456789" required
+                           class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all text-lg">
+                </div>
+            </div>
+
+            <!-- Title -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                    Title <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-heading text-gray-400"></i>
+                    </div>
+                    <input type="text" name="title" placeholder="e.g., Things Fall Apart" required
+                           class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all text-lg">
+                </div>
+            </div>
+
+            <!-- Grid: Year + Cost -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">
+                        Publication Year <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-calendar text-gray-400"></i>
+                        </div>
+                        <input type="number" name="publication_year" placeholder="2024" required
+                               class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all text-lg">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">
+                        Replacement Cost (UGX)
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-money-bill-wave text-gray-400"></i>
+                        </div>
+                        <input type="number" step="0.01" name="replacement_cost" placeholder="30000"
+                               class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all text-lg">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                    Category <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-tags text-gray-400"></i>
+                    </div>
+                    <select name="category_id" required
+                            class="w-full pl-10 pr-10 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all text-lg appearance-none bg-white">
+                        <option value="">-- Select a category --</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.category_id }}">{{ cat.category_name }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <i class="fas fa-chevron-down text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Publisher -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                    Publisher <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-building text-gray-400"></i>
+                    </div>
+                    <select name="publisher_id" required
+                            class="w-full pl-10 pr-10 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all text-lg appearance-none bg-white">
+                        <option value="">-- Select a publisher --</option>
+                        {% for pub in publishers %}
+                        <option value="{{ pub.publisher_id }}">{{ pub.publisher_name }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <i class="fas fa-chevron-down text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-4">
+                <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 rounded-lg text-lg transition-colors shadow-md flex items-center justify-center">
+                    <i class="fas fa-plus-circle mr-2"></i> Add Book to Catalog
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+{% endblock %}

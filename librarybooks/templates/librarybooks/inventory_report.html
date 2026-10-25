@@ -1,0 +1,309 @@
+{% extends "librarybooks/base.html" %}
+{% block title %}Inventory Report - Library Management System{% endblock %}
+{% block extra_head %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+{% block content %}
+
+<section class="mb-8 flex justify-between items-center">
+    <div>
+        <h1 class="text-3xl font-bold text-blue-800">
+            <i class="fas fa-warehouse text-indigo-600 mr-2"></i> Inventory & Cataloging Report
+        </h1>
+        <p class="text-gray-600">Generated on {% now "l, jS F Y H:i" %} — Physical stock, asset value, and shelf availability overview</p>
+    </div>
+    <div class="flex gap-3">
+        <button onclick="window.print()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition-colors">
+            <i class="fas fa-print mr-2"></i> Print / Save as PDF
+        </button>
+        <a href="{% url 'reports' %}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Reports
+        </a>
+    </div>
+</section>
+
+<!-- Summary Cards -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="bg-blue-50 rounded-lg shadow p-6 border-l-4 border-blue-500">
+        <div class="flex items-center justify-center h-10 w-10 mb-3 bg-blue-100 rounded-full text-blue-600">
+            <i class="fas fa-book"></i>
+        </div>
+        <div class="text-3xl font-bold text-blue-800">{{ totals.total_titles }}</div>
+        <div class="text-sm text-gray-500 mt-1">Total Titles (Catalog)</div>
+    </div>
+    <div class="bg-indigo-50 rounded-lg shadow p-6 border-l-4 border-indigo-500">
+        <div class="flex items-center justify-center h-10 w-10 mb-3 bg-indigo-100 rounded-full text-indigo-600">
+            <i class="fas fa-copy"></i>
+        </div>
+        <div class="text-3xl font-bold text-indigo-800">{{ totals.total_copies }}</div>
+        <div class="text-sm text-gray-500 mt-1">Physical Copies</div>
+    </div>
+    <div class="bg-green-50 rounded-lg shadow p-6 border-l-4 border-green-500">
+        <div class="flex items-center justify-center h-10 w-10 mb-3 bg-green-100 rounded-full text-green-600">
+            <i class="fas fa-money-bill-wave"></i>
+        </div>
+        <div class="text-3xl font-bold text-green-800">{{ totals.catalog_value|floatformat:0 }}</div>
+        <div class="text-sm text-gray-500 mt-1">Catalog Asset Value (UGX)</div>
+    </div>
+    <div class="bg-red-50 rounded-lg shadow p-6 border-l-4 border-red-500">
+        <div class="flex items-center justify-center h-10 w-10 mb-3 bg-red-100 rounded-full text-red-600">
+            <i class="fas fa-triangle-exclamation"></i>
+        </div>
+        <div class="text-3xl font-bold text-red-800">{{ totals.lost_or_withdrawn }}</div>
+        <div class="text-sm text-gray-500 mt-1">Lost / Withdrawn Copies</div>
+    </div>
+</div>
+
+<!-- Shelf Availability -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+    <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+        <div class="text-sm text-gray-500 uppercase tracking-wide">Available on Shelf</div>
+        <div class="text-4xl font-bold text-green-700 mt-2">{{ totals.available_copies }}</div>
+        <div class="text-sm text-gray-500 mt-1">Copies ready to be borrowed</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-6 border-l-4 border-orange-500">
+        <div class="text-sm text-gray-500 uppercase tracking-wide">Currently on Loan</div>
+        <div class="text-4xl font-bold text-orange-700 mt-2">{{ totals.on_loan_copies }}</div>
+        <div class="text-sm text-gray-500 mt-1">Copies out with borrowers</div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-bold text-blue-800 mb-4">
+            <i class="fas fa-book text-blue-600 mr-2"></i> Physical Copies by Category
+        </h2>
+        <p class="text-sm text-gray-500 mb-4 font-mono">SELECT c.category_name, COUNT(bc.copy_id) … GROUP BY c.category_name</p>
+        <div class="h-72"><canvas id="categoryChart"></canvas></div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-bold text-blue-800 mb-4">
+            <i class="fas fa-chart-pie text-orange-500 mr-2"></i> Shelf Status Distribution
+        </h2>
+        <p class="text-sm text-gray-500 mb-4 font-mono">SELECT status, COUNT(*) … GROUP BY status</p>
+        <div class="h-72"><canvas id="statusChart"></canvas></div>
+    </div>
+</div>
+
+<!-- Category Breakdown Table -->
+<div class="bg-white rounded-lg shadow p-6 mb-8">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-blue-800">
+            <i class="fas fa-table-list text-indigo-600 mr-2"></i> Category Planning Breakdown
+        </h2>
+        <a href="{% url 'export_books_csv' %}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded text-sm">
+            <i class="fas fa-download mr-1"></i> Export CSV
+        </a>
+    </div>
+    <table class="min-w-full table-auto border-collapse bg-white">
+        <thead class="bg-blue-800 text-white">
+            <tr>
+                <th class="px-4 py-2 text-left">Category</th>
+                <th class="px-4 py-2 text-left">Titles</th>
+                <th class="px-4 py-2 text-left">Physical Copies</th>
+                <th class="px-4 py-2 text-left">Asset Value (UGX)</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+            {% for cat in category_breakdown %}
+            <tr class="hover:bg-gray-50">
+                <td class="px-4 py-2 font-medium">{{ cat.category_name }}</td>
+                <td class="px-4 py-2">{{ cat.total_titles }}</td>
+                <td class="px-4 py-2">{{ cat.total_copies }}</td>
+                <td class="px-4 py-2 text-green-600 font-medium">{{ cat.total_value|floatformat:0 }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="px-4 py-2 text-center text-gray-500">No categories with physical copies yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Top Stocked Titles -->
+<div class="bg-white rounded-lg shadow p-6 mb-8">
+    <h2 class="text-xl font-bold text-blue-800 mb-4">
+        <i class="fas fa-trophy text-yellow-500 mr-2"></i> Top 10 Most Stocked Titles
+    </h2>
+    <p class="text-sm text-gray-500 mb-4">Titles with the highest number of physical copies</p>
+    <table class="min-w-full table-auto border-collapse bg-white">
+        <thead class="bg-blue-800 text-white">
+            <tr>
+                <th class="px-4 py-2 text-left">Rank</th>
+                <th class="px-4 py-2 text-left">Title</th>
+                <th class="px-4 py-2 text-left">Category</th>
+                <th class="px-4 py-2 text-left">Total Copies</th>
+                <th class="px-4 py-2 text-left">Available</th>
+                <th class="px-4 py-2 text-left">On Loan</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+            {% for book in top_books %}
+            <tr class="hover:bg-gray-50">
+                <td class="px-4 py-2">{{ forloop.counter }}</td>
+                <td class="px-4 py-2 font-medium">{{ book.title }}</td>
+                <td class="px-4 py-2 text-gray-600">{{ book.category_name }}</td>
+                <td class="px-4 py-2 font-bold">{{ book.copy_count }}</td>
+                <td class="px-4 py-2 text-green-600">{{ book.available }}</td>
+                <td class="px-4 py-2 text-orange-600">{{ book.on_loan }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% block extra_scripts %}
+<script>
+    const categoryData = {{ chart_categories|safe }};
+    const statusData = {{ chart_status|safe }};
+
+    // Bar Chart: Copies by Category
+    new Chart(document.getElementById('categoryChart'), {
+        type: 'bar',
+        data: {
+            labels: categoryData.labels,
+            datasets: [{
+                label: 'Physical Copies',
+                data: categoryData.data,
+                backgroundColor: '#4f46e5',
+                borderRadius: 5,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+    });
+
+    // Doughnut Chart: Shelf Status
+    new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: {
+            labels: statusData.labels,
+            datasets: [{
+                data: statusData.data,
+                backgroundColor: [
+                    '#10b981', // green - Available
+                    '#f59e0b', // orange - On Loan
+                    '#8b5cf6', // purple - Reserved
+                    '#ef4444', // red - Lost
+                    '#6b7280'  // gray - Withdrawn
+                ],
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.parsed + ' copies';
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+<style>
+    @media print {
+        /* Hide everything that doesn't belong on paper */
+        nav, .no-print, button, a[href*="reports"],
+        canvas, .h-72, script, .navbar { 
+            display: none !important; 
+        }
+
+        /* Force everything to black and white on paper for ink economy */
+        body { 
+            background: white !important; 
+            color: black !important; 
+            font-size: 11pt;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* A4 page setup */
+        @page {
+            size: A4;
+            margin: 15mm;
+        }
+
+        /* Make the container full width */
+        main, .container { 
+            max-width: 100% !important; 
+            padding: 0 !important; 
+            margin: 0 !important; 
+        }
+
+        /* Print the report title */
+        h1 { 
+            font-size: 18pt; 
+            color: black !important; 
+            border-bottom: 2px solid black;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        h2 { font-size: 13pt; color: black !important; }
+
+        /* Summary cards - keep them inline on paper */
+        .grid { 
+            display: grid !important; 
+            grid-template-columns: repeat(4, 1fr) !important; 
+            gap: 8px !important;
+            margin-bottom: 15px !important;
+        }
+
+        .grid-cols-2 { grid-template-columns: repeat(2, 1fr) !important; }
+
+        /* Cards → simple bordered boxes */
+        .bg-blue-50, .bg-indigo-50, .bg-green-50, .bg-red-50, .bg-white {
+            background: white !important; 
+            border: 1px solid black !important;
+            border-left: 4px solid black !important;
+            box-shadow: none !important;
+            padding: 10px !important;
+        }
+
+        /* Numbers and labels */
+        .text-3xl { font-size: 16pt !important; color: black !important; font-weight: bold !important; }
+        .text-sm { font-size: 9pt !important; color: black !important; }
+        .text-4xl { font-size: 18pt !important; color: black !important; }
+
+        /* Tables */
+        table { 
+            width: 100% !important; 
+            border-collapse: collapse !important; 
+            font-size: 10pt !important;
+            page-break-inside: auto;
+        }
+        th { 
+            background: black !important; 
+            color: white !important; 
+            padding: 6px !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        td { 
+            border-bottom: 1px solid #ccc !important; 
+            padding: 5px !important;
+        }
+        tr { page-break-inside: avoid; }
+
+        /* Print a footer with timestamp */
+        body::after {
+            content: "Generated on " attr(data-print-date);
+            display: block;
+            text-align: center;
+            font-size: 9pt;
+            color: #666;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #ccc;
+        }
+    }
+</style>
+{% endblock %}
+{% endblock %}

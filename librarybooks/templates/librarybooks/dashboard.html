@@ -1,0 +1,227 @@
+{% extends "librarybooks/base.html" %}
+{% block title %}Dashboard - Library Management System{% endblock %}
+{% block content %}
+<section class="mb-8">
+    <h2 class="text-2xl font-bold text-blue-800 mb-4">Librarian Dashboard</h2>
+    <p class="text-gray-600">Welcome, {{ user.first_name }} {{ user.last_name }} ({{ user.role }})</p>
+</section>
+
+<!-- Quick Actions -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+
+    <!-- Search — everyone -->
+    <a href="{% url 'book_search' %}" class="block bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+        <div class="flex flex-col items-center p-6">
+            <div class="flex items-center justify-center h-12 w-12 mb-3 bg-blue-100 rounded-full text-blue-600 text-2xl">
+                <i class="fas fa-search"></i>
+            </div>
+            <span class="font-medium text-blue-800 text-center">Search Books</span>
+        </div>
+    </a>
+
+    <!-- Check Out — everyone -->
+    <a href="{% url 'checkout' %}" class="block bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+        <div class="flex flex-col items-center p-6">
+            <div class="flex items-center justify-center h-12 w-12 mb-3 bg-green-100 rounded-full text-green-600 text-2xl">
+                <i class="fas fa-sign-out-alt"></i>
+            </div>
+            <span class="font-medium text-green-800 text-center">Check Out Book</span>
+        </div>
+    </a>
+
+    <!-- Return — everyone -->
+    <a href="{% url 'return_book' %}" class="block bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+        <div class="flex flex-col items-center p-6">
+            <div class="flex items-center justify-center h-12 w-12 mb-3 bg-orange-100 rounded-full text-orange-600 text-2xl">
+                <i class="fas fa-sign-in-alt"></i>
+            </div>
+            <span class="font-medium text-orange-800 text-center">Return Book</span>
+        </div>
+    </a>
+
+    {% if user.role == 'Librarian' or user.role == 'Admin' or user.is_superuser %}
+    <!-- Reports — Librarian + Admin -->
+    <a href="{% url 'reports' %}" class="block bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+        <div class="flex flex-col items-center p-6">
+            <div class="flex items-center justify-center h-12 w-12 mb-3 bg-purple-100 rounded-full text-purple-600 text-2xl">
+                <i class="fas fa-chart-bar"></i>
+            </div>
+            <span class="font-medium text-purple-800 text-center">Reports</span>
+        </div>
+    </a>
+    <a href="{% url 'inventory_report' %}" class="block bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+        <div class="flex flex-col items-center p-6">
+            <div class="flex items-center justify-center h-12 w-12 mb-3 bg-cyan-100 rounded-full text-cyan-600 text-2xl">
+                <i class="fas fa-warehouse"></i>
+            </div>
+            <span class="font-medium text-cyan-800 text-center">Inventory Report</span>
+        </div>
+    </a>
+    <!-- Add Book — Librarian + Admin -->
+    <a href="{% url 'add_book' %}" class="block bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+        <div class="flex flex-col items-center p-6">
+            <div class="flex items-center justify-center h-12 w-12 mb-3 bg-teal-100 rounded-full text-teal-600 text-2xl">
+                <i class="fas fa-book"></i>
+            </div>
+            <span class="font-medium text-teal-800 text-center">Add Book</span>
+        </div>
+    </a>
+
+    <!-- Add Member — Librarian + Admin -->
+    <a href="{% url 'add_member' %}" class="block bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+        <div class="flex flex-col items-center p-6">
+            <div class="flex items-center justify-center h-12 w-12 mb-3 bg-pink-100 rounded-full text-pink-600 text-2xl">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <span class="font-medium text-pink-800 text-center">Add Member</span>
+        </div>
+    </a>
+
+    <!-- Pay Fines — Librarian + Admin -->
+    <a href="{% url 'process_payment' %}" class="block bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+        <div class="flex flex-col items-center p-6">
+            <div class="flex items-center justify-center h-12 w-12 mb-3 bg-yellow-100 rounded-full text-yellow-600 text-2xl">
+                <i class="fas fa-credit-card"></i>
+            </div>
+            <span class="font-medium text-yellow-800 text-center">Pay Fines</span>
+        </div>
+    </a>
+    {% endif %}
+
+    {% if user.role == 'Admin' or user.is_superuser %}
+    <!-- Data Explorer — Admin only -->
+    <a href="{% url 'explorer' 'books' %}" class="block bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+        <div class="flex flex-col items-center p-6">
+            <div class="flex items-center justify-center h-12 w-12 mb-3 bg-indigo-100 rounded-full text-indigo-600 text-2xl">
+                <i class="fas fa-database"></i>
+            </div>
+            <span class="font-medium text-indigo-800 text-center">Data Explorer</span>
+        </div>
+    </a>
+
+    <!-- Add Staff — Admin only -->
+    <a href="{% url 'add_staff' %}" class="block bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+        <div class="flex flex-col items-center p-6">
+            <div class="flex items-center justify-center h-12 w-12 mb-3 bg-rose-100 rounded-full text-rose-600 text-2xl">
+                <i class="fas fa-user-tie"></i>
+            </div>
+            <span class="font-medium text-rose-800 text-center">Add Staff</span>
+        </div>
+    </a>
+    {% endif %}
+
+</div>
+
+<!-- Statistics Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+    <div class="bg-blue-50 rounded-lg shadow p-6 border-l-4 border-blue-500 hover:bg-blue-100 transition-colors">
+        <div class="flex items-center justify-center h-12 w-12 mb-4 bg-blue-100 rounded-full text-blue-600">
+            <i class="fas fa-book"></i>
+        </div>
+        <div class="text-3xl font-bold text-blue-800">{{ stats.total_books }}</div>
+        <div class="text-sm text-gray-500 mt-1">Book Titles</div>
+    </div>
+    <div class="bg-indigo-50 rounded-lg shadow p-6 border-l-4 border-indigo-500 hover:bg-indigo-100 transition-colors">
+        <div class="flex items-center justify-center h-12 w-12 mb-4 bg-indigo-100 rounded-full text-indigo-600">
+            <i class="fas fa-copy"></i>
+        </div>
+        <div class="text-3xl font-bold text-indigo-800">{{ stats.total_copies }}</div>
+        <div class="text-sm text-gray-500 mt-1">Physical Copies</div>
+    </div>
+    <div class="bg-green-50 rounded-lg shadow p-6 border-l-4 border-green-500 hover:bg-green-100 transition-colors">
+        <div class="flex items-center justify-center h-12 w-12 mb-4 bg-green-100 rounded-full text-green-600">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="text-3xl font-bold text-green-800">{{ stats.total_members }}</div>
+        <div class="text-sm text-gray-500 mt-1">Active Members</div>
+    </div>
+    <div class="bg-purple-50 rounded-lg shadow p-6 border-l-4 border-purple-500 hover:bg-purple-100 transition-colors">
+        <div class="flex items-center justify-center h-12 w-12 mb-4 bg-purple-100 rounded-full text-purple-600">
+            <i class="fas fa-sign-out-alt"></i>
+        </div>
+        <div class="text-3xl font-bold text-purple-800">{{ stats.active_loans }}</div>
+        <div class="text-sm text-gray-500 mt-1">Active Loans</div>
+    </div>
+    <div class="bg-red-50 rounded-lg shadow p-6 border-l-4 border-red-500 hover:bg-red-100 transition-colors">
+        <div class="flex items-center justify-center h-12 w-12 mb-4 bg-red-100 rounded-full text-red-600">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="text-3xl font-bold text-red-800">{{ stats.overdue_loans }}</div>
+        <div class="text-sm text-gray-500 mt-1">Overdue Loans</div>
+    </div>
+    <div class="bg-amber-50 rounded-lg shadow p-6 border-l-4 border-amber-500 hover:bg-amber-100 transition-colors">
+        <div class="flex items-center justify-center h-12 w-12 mb-4 bg-amber-100 rounded-full text-amber-600">
+            <i class="fas fa-dollar-sign"></i>
+        </div>
+        <div class="text-3xl font-bold text-amber-800">{{ stats.unpaid_fines|floatformat:0 }}</div>
+        <div class="text-sm text-gray-500 mt-1">Unpaid Fines (UGX)</div>
+    </div>
+</div>
+
+<!-- Recent Loans -->
+<h3 class="text-xl font-bold text-blue-800 mb-4">
+    <i class="fas fa-arrow-right-from-bracket text-blue-600 mr-2"></i> Recent Loans
+</h3>
+<div class="overflow-x-auto">
+    <table class="min-w-full table-auto border-collapse">
+        <thead class="bg-blue-800 text-white">
+            <tr>
+                <th class="px-4 py-2 text-left">Loan ID</th>
+                <th class="px-4 py-2 text-left">Book Title</th>
+                <th class="px-4 py-2 text-left">Member</th>
+                <th class="px-4 py-2 text-left">Issue Date</th>
+                <th class="px-4 py-2 text-left">Due Date</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            {% for loan in recent_loans %}
+            <tr class="hover:bg-gray-50">
+                <td class="px-4 py-2">#{{ loan.loan_id }}</td>
+                <td class="px-4 py-2">{{ loan.title }}</td>
+                <td class="px-4 py-2">{{ loan.first_name }} {{ loan.last_name }}</td>
+                <td class="px-4 py-2">{{ loan.issue_date }}</td>
+                <td class="px-4 py-2">{{ loan.due_date }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="px-4 py-2 text-center text-gray-500">No loans recorded yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Overdue Loans -->
+<h3 class="text-xl font-bold text-blue-800 mb-4 mt-8">
+    <i class="fas fa-triangle-exclamation text-red-500 mr-2"></i> Overdue Loans (Action Required)
+</h3>
+<div class="overflow-x-auto">
+    <table class="min-w-full table-auto border-collapse">
+        <thead class="bg-blue-800 text-white">
+            <tr>
+                <th class="px-4 py-2 text-left">Loan ID</th>
+                <th class="px-4 py-2 text-left">Book Title</th>
+                <th class="px-4 py-2 text-left">Member</th>
+                <th class="px-4 py-2 text-left">Due Date</th>
+                <th class="px-4 py-2 text-left">Days Overdue</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            {% for loan in overdue_loans %}
+            <tr class="hover:bg-gray-50">
+                <td class="px-4 py-2">#{{ loan.loan_id }}</td>
+                <td class="px-4 py-2">{{ loan.title }}</td>
+                <td class="px-4 py-2">{{ loan.first_name }} {{ loan.last_name }}</td>
+                <td class="px-4 py-2">{{ loan.due_date }}</td>
+                <td class="px-4 py-2 flex items-center">
+                    <span class="inline-block bg-red-100 text-red-800 px-2 py-1 rounded text-xs">
+                        {{ loan.days_overdue }} days
+                    </span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="px-4 py-2 text-center text-gray-500">No overdue loans. Great job!</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends "librarybooks/base.html" %}
+{% block title %}Return Book - Library Management System{% endblock %}
+{% block content %}
+
+<div class="max-w-5xl mx-auto">
+
+    <!-- Header Section -->
+    <div class="flex items-center mb-8">
+        <div class="flex items-center justify-center h-14 w-14 bg-blue-100 rounded-full text-blue-600 text-2xl mr-4 shadow-sm">
+            <i class="fas fa-arrow-right-to-bracket"></i>
+        </div>
+        <div>
+            <h1 class="text-3xl font-bold text-blue-800">Return a Book</h1>
+            <p class="text-gray-500 mt-1">Accept a returned copy and calculate any overdue fines.</p>
+        </div>
+    </div>
+
+    <!-- Return Form Card -->
+    <div class="bg-white rounded-xl shadow-lg p-8 border-t-4 border-blue-500 mb-8">
+        
+        {% if success %}
+            <div class="bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded mb-6 flex items-start">
+                <i class="fas fa-check-circle mt-1 mr-3 text-green-500 text-lg"></i>
+                <div>
+                    <strong class="block font-bold">Success!</strong>
+                    <span>{{ success }}</span>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if error %}
+            <div class="bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded mb-6 flex items-start">
+                <i class="fas fa-times-circle mt-1 mr-3 text-red-500 text-lg"></i>
+                <div>
+                    <strong class="block font-bold">Error</strong>
+                    <span>{{ error }}</span>
+                </div>
+            </div>
+        {% endif %}
+
+        <form method="POST" class="flex flex-col sm:flex-row gap-4 items-end">
+            {% csrf_token %}
+            <div class="flex-grow w-full">
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                    Copy ID (Barcode) <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-barcode text-gray-400"></i>
+                    </div>
+                    <input 
+                        type="number" 
+                        name="copy_id" 
+                        placeholder="e.g., 14" 
+                        required autofocus
+                        class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-lg"
+                    >
+                </div>
+            </div>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors shadow-md flex items-center justify-center whitespace-nowrap">
+                <i class="fas fa-rotate-left mr-2"></i> Process Return
+            </button>
+        </form>
+    </div>
+
+    <!-- Currently on Loan Table Card -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+            <div class="flex items-center">
+                <div class="flex items-center justify-center h-10 w-10 bg-indigo-100 rounded-full text-indigo-600 mr-3">
+                    <i class="fas fa-list-check"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Books Currently on Loan</h2>
+                    <p class="text-sm text-gray-500">Active loans awaiting return</p>
+                </div>
+            </div>
+            <span class="bg-indigo-100 text-indigo-800 font-bold px-3 py-1 rounded-full text-sm">
+                {{ pending_loans|length }} Active
+            </span>
+        </div>
+
+        {% if pending_loans %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full table-auto border-collapse">
+                    <thead class="bg-blue-800 text-white">
+                        <tr>
+                            <th class="px-4 py-3 text-left font-semibold text-sm">Loan ID</th>
+                            <th class="px-4 py-3 text-left font-semibold text-sm">Copy ID</th>
+                            <th class="px-4 py-3 text-left font-semibold text-sm">Title</th>
+                            <th class="px-4 py-3 text-left font-semibold text-sm">Borrower</th>
+                            <th class="px-4 py-3 text-left font-semibold text-sm">Issued</th>
+                            <th class="px-4 py-3 text-left font-semibold text-sm">Due</th>
+                            <th class="px-4 py-3 text-left font-semibold text-sm">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        {% for loan in pending_loans %}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-4 py-3 font-mono text-sm text-gray-600">#{{ loan.loan_id }}</td>
+                            <td class="px-4 py-3 font-bold text-gray-800">{{ loan.copy_id }}</td>
+                            <td class="px-4 py-3 text-gray-800">{{ loan.title }}</td>
+                            <td class="px-4 py-3 text-gray-700">{{ loan.first_name }} {{ loan.last_name }}</td>
+                            <td class="px-4 py-3 text-gray-600 text-sm">{{ loan.issue_date }}</td>
+                            <td class="px-4 py-3 text-gray-600 text-sm">{{ loan.due_date }}</td>
+                            <td class="px-4 py-3">
+                                {% if loan.days_late > 0 %}
+                                    <span class="inline-flex items-center bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-bold">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        {{ loan.days_late }} days overdue
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-bold">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        On time
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="p-12 text-center">
+                <div class="flex items-center justify-center h-16 w-16 bg-green-100 rounded-full mx-auto mb-4">
+                    <i class="fas fa-check text-green-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-800 mb-1">All books returned</h3>
+                <p class="text-gray-500">There are no active loans to display.</p>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock %}
