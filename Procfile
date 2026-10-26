@@ -1,1 +1,1 @@
-web: gunicorn librarymanagementsystembooks.wsgi
+web: gunicorn librarymanagementsystembooks.wsgi:application
